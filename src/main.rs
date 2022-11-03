@@ -1,9 +1,24 @@
 use fltk::{app, button::Button, frame::Frame, prelude::*, window::Window,enums::*,image::PngImage};
 
+
 const BURCH_BLUE: u32 = 0x00396d;
 const BOARD_COLOR: u32 = 0xf4fa04;
 const BG_COLOR: u32 = 0xadd8e6;
 const COIN_RED: u32 = 0xa3180a;
+
+fn make_move(mut move_nr:i32){
+    println!("move is {}",move_nr);
+}
+fn game_restart(){
+    println!("game has been restarted");
+}
+fn load_save_game(){
+    println!("game save has been loaded");
+}
+
+fn save_game(){
+    println!("game progress has been saved");
+}
 
 fn draw_board(){
     let mut board_back = Frame::new(130, 88, 650, 437, "");
@@ -25,10 +40,12 @@ fn draw_board(){
     }
 }
 fn draw_buttons(){
+    //Game Control Buttons
     let mut load_button = Button::new(20, 90, 95, 50, "LOAD");
     let mut save_button = Button::new(20, 155, 95, 50, "SAVE");
     let mut restart_button = Button::new(20, 220, 95, 50, "RESTART");
 
+    //Playing Buttons
     let mut place_button1 = Button::new(130, 20, 80, 50, "PLACE\n|\nv");
     let mut place_button2  = Button::new(225, 20, 80, 50, "PLACE\n|\nv");
     let mut place_button3  = Button::new(320, 20, 80, 50, "PLACE\n|\nv");
@@ -36,7 +53,27 @@ fn draw_buttons(){
     let mut place_button5  = Button::new(510, 20, 80, 50, "PLACE\n|\nv");
     let mut place_button6  = Button::new(605, 20, 80, 50, "PLACE\n|\nv");
     let mut place_button7  = Button::new(700, 20, 80, 50, "PLACE\n|\nv");
+    
+    //Game Control Buttons Callbacks
+    load_button.set_callback(|_| load_save_game());
+    save_button.set_callback(|_| save_game());
+    restart_button.set_callback(|_| game_restart());
 
+    //Game Control Buttons Style
+    load_button.set_color(Color::from_u32(BURCH_BLUE));
+    save_button.set_color(Color::from_u32(BURCH_BLUE));
+    restart_button.set_color(Color::from_u32(BURCH_BLUE));
+
+    //Playing Buttons callbacks
+    place_button1.set_callback(|_| make_move(1));
+    place_button2.set_callback(|_| make_move(2));
+    place_button3.set_callback(|_| make_move(3));
+    place_button4.set_callback(|_| make_move(4));
+    place_button5.set_callback(|_| make_move(5));
+    place_button6.set_callback(|_| make_move(6));
+    place_button7.set_callback(|_| make_move(7));
+
+    //Playing Buttons colors
     place_button1.set_color(Color::from_u32(BURCH_BLUE));
     place_button2.set_color(Color::from_u32(BURCH_BLUE));
     place_button3.set_color(Color::from_u32(BURCH_BLUE));
@@ -44,9 +81,6 @@ fn draw_buttons(){
     place_button5.set_color(Color::from_u32(BURCH_BLUE));
     place_button6.set_color(Color::from_u32(BURCH_BLUE));
     place_button7.set_color(Color::from_u32(BURCH_BLUE));
-    load_button.set_color(Color::from_u32(BURCH_BLUE));
-    save_button.set_color(Color::from_u32(BURCH_BLUE));
-    restart_button.set_color(Color::from_u32(BURCH_BLUE));
 }
 fn draw_logo(){
     let mut logo_place_holder = Frame::new(20, 30, 100, 50, "");
@@ -71,3 +105,5 @@ fn main() {
     window.show();
     app.run().unwrap();
 }
+
+
