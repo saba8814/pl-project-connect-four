@@ -1,5 +1,8 @@
 use fltk::{app, button::Button, frame::Frame, prelude::*, window::Window,enums::*,image::PngImage};
-
+use std::fmt;
+use std::io::stdin;
+use std::str::FromStr;
+use rand::Rng;
 
 const BURCH_BLUE: u32 = 0x00396d;
 const BOARD_COLOR: u32 = 0xf4fa04;
@@ -20,24 +23,10 @@ fn save_game(){
     println!("game progress has been saved");
 }
 
-fn draw_board(){
+fn draw_back_board(){
     let mut board_back = Frame::new(130, 88, 650, 437, "");
     board_back.set_frame(FrameType::RFlatBox);
     board_back.set_color(Color::from_u32(BOARD_COLOR));
-    for n in 0..7 {
-        for m in 0..6{
-            if m==0{
-                let mut circle=Frame::new(150+n*94, 90, 50, 50, "");
-                circle.set_frame(FrameType::OvalBox);
-                circle.set_color(Color::White);
-            }
-            else{
-                let mut circle=Frame::new(150+n*94, (m+1)*79, 50, 50, "");
-                circle.set_frame(FrameType::OvalBox);
-                circle.set_color(Color::White);
-            } 
-        }
-    }
 }
 fn draw_buttons(){
     //Game Control Buttons
@@ -53,7 +42,7 @@ fn draw_buttons(){
     let mut place_button5  = Button::new(510, 20, 80, 50, "PLACE\n|\nv");
     let mut place_button6  = Button::new(605, 20, 80, 50, "PLACE\n|\nv");
     let mut place_button7  = Button::new(700, 20, 80, 50, "PLACE\n|\nv");
-    
+
     //Game Control Buttons Callbacks
     load_button.set_callback(|_| load_save_game());
     save_button.set_callback(|_| save_game());
@@ -93,17 +82,89 @@ fn draw_text_label(){
     text_place_holder.set_label_size(30);
     text_place_holder.set_label_color(Color::from_u32(BURCH_BLUE));
 }
-fn main() {
-    let app = app::App::default();
-    let mut window = Window::new(100, 100, 800, 600, "Connect Four || IBU IT || PL Project");
-    draw_board();
+
+fn draw_UI(){
+    draw_back_board();
     draw_buttons();
     draw_logo();
     draw_text_label();
+}
+fn main() {
+    let app = app::App::default();
+    let mut window = Window::new(100, 100, 800, 600, "Connect Four || IBU IT || PL Project");
+    let mut grid = Grid::new();
+    draw_UI();
+    grid.print();
     window.set_color(Color::from_u32(BG_COLOR));
     window.end();
     window.show();
     app.run().unwrap();
 }
 
+struct Grid {
+    column_count: i32,
+    row_count: i32,
+    rows: Vec<Row>,
+}
+impl Grid {
+    pub fn new() -> Grid {
+        Grid {
+            column_count: 7,
+            row_count: 6,
+            rows: (0..7).map(|_| Row::new(6)).collect(),
+        }
+    }
+    pub fn print(&self) {
+        for column in 0..self.column_count {
+            for row in 0..self.row_count{
+                if row==0{
+                    let mut circle=Frame::new(150+column*94, 90, 50, 50, "");
+                    circle.set_frame(FrameType::OvalBox);
+                    if(self.rows[column as usize].tiles[row as usize].value=="RED"){
+                        circle.set_color(Color::Red);
+                    }
+                    else{
+                        circle.set_color(Color::Blue);
+                    }
+                }
+                else{
+                    let mut circle=Frame::new(150+column*94, (row+1)*79, 50, 50, "");
+                    circle.set_frame(FrameType::OvalBox);
+                    if(self.rows[column as usize].tiles[row as usize].value=="RED"){
+                        circle.set_color(Color::Red);
+                    }
+                    else{
+                        circle.set_color(Color::Blue);
+                    }
+                } 
+            }
+        }
+    }
+}
+struct Row {
+    tiles: Vec<Tile>,
+}
+impl Row {
+    pub fn new(column_count: usize) -> Row {
+        let mut rng = rand::thread_rng();
+        Row {
+            tiles: (0..column_count).map(|_| (if rng.gen_range(0..2)==1{Tile::new("RED".to_string())}else{Tile::new("BLUE".to_string())})).collect(),
+        }
+    }
+    pub fn len(&self) -> usize {
+        self.tiles.len() as usize
+    }
 
+}
+
+struct Tile{
+    value: String
+}
+
+impl Tile{
+    pub fn new(tile_value: String) -> Tile{
+        Tile{
+            value: tile_value
+        }
+    }
+}
