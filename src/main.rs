@@ -1,13 +1,16 @@
 use fltk::{app, button::Button, frame::Frame, prelude::*, window::Window,enums::*,image::PngImage};
-use std::fmt;
-use std::io::stdin;
+use std::io::{BufRead, BufReader};
 use std::str::FromStr;
 use rand::Rng;
+use std::fs::File;
+use std::io::Write;
+use chrono::Local;
 
-const BURCH_BLUE: u32 = 0x00396d;
-const BOARD_COLOR: u32 = 0xf4fa04;
-const BG_COLOR: u32 = 0xadd8e6;
-const COIN_RED: u32 = 0xa3180a;
+const BG_COLOR: u32 = 0x118ab2;
+const BURCH_BLUE: u32 = 0x073b4c;
+const BOARD_COLOR: u32 = 0x073b4c;
+const COIN_RED: u32 = 0xef476f;
+const COIN_BLUE: u32 = 0xffd166;
 
 fn make_move(mut move_nr:i32){
     println!("move is {}",move_nr);
@@ -16,11 +19,19 @@ fn game_restart(){
     println!("game has been restarted");
 }
 fn load_save_game(){
-    println!("game save has been loaded");
+    let reader = BufReader::new(File::open("test.txt").expect("Cannot open file.txt"));
+
+    for line in reader.lines() {
+        for word in line.unwrap().split_whitespace() {
+            println!("{}", word);
+        }
+    }
 }
 
 fn save_game(){
-    println!("game progress has been saved");
+    let date = Local::now();
+    let mut file = File::create(format!("{}{}",date.format("%Y-%m-%d-%H-%M-%S").to_string(),"save-game.txt")).expect("create failed");
+    file.write_all("test test".as_bytes()).expect("write failed");
 }
 
 fn draw_back_board(){
@@ -98,7 +109,7 @@ fn main() {
     window.set_color(Color::from_u32(BG_COLOR));
     window.end();
     window.show();
-    app.run().unwrap();
+    app.run().unwrap(); 
 }
 
 struct Grid {
@@ -121,20 +132,20 @@ impl Grid {
                     let mut circle=Frame::new(150+column*94, 90, 50, 50, "");
                     circle.set_frame(FrameType::OvalBox);
                     if(self.rows[column as usize].tiles[row as usize].value=="RED"){
-                        circle.set_color(Color::Red);
+                        circle.set_color(Color::from_u32(COIN_RED));
                     }
                     else{
-                        circle.set_color(Color::Blue);
+                        circle.set_color(Color::from_u32(COIN_BLUE));
                     }
                 }
                 else{
                     let mut circle=Frame::new(150+column*94, (row+1)*79, 50, 50, "");
                     circle.set_frame(FrameType::OvalBox);
                     if(self.rows[column as usize].tiles[row as usize].value=="RED"){
-                        circle.set_color(Color::Red);
+                        circle.set_color(Color::from_u32(COIN_RED));
                     }
                     else{
-                        circle.set_color(Color::Blue);
+                        circle.set_color(Color::from_u32(COIN_BLUE));
                     }
                 } 
             }
