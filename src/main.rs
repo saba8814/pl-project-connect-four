@@ -10,9 +10,6 @@ const BOARD_COLOR: u32 = 0x073b4c;
 const COIN_RED: u32 = 0xef476f;
 const COIN_YELLOW: u32 = 0xffd166;
 
-fn game_restart(){
-    println!("game has been restarted");
-}
 fn load_save_game(){
     let reader = BufReader::new(File::open("test.txt").expect("Cannot open file.txt"));
 
@@ -67,7 +64,6 @@ fn main() {
     //Game Control Buttons Callbacks
     load_button.set_callback(|_| load_save_game());
     save_button.set_callback(|_| save_game());
-    restart_button.set_callback(|_| game_restart());
 
     //Game Control Buttons Style
     load_button.set_color(Color::from_u32(BURCH_BLUE));
@@ -75,13 +71,15 @@ fn main() {
     restart_button.set_color(Color::from_u32(BURCH_BLUE));
 
     //Playing Buttons emits
-    let (s1, r1) = app::channel::<String>();
-    let (s2, r2) = app::channel::<String>();
-    let (s3, r3) = app::channel::<String>();
-    let (s4, r4) = app::channel::<String>();
-    let (s5, r5) = app::channel::<String>();
-    let (s6, r6) = app::channel::<String>();
-    let (s7, r7) = app::channel::<String>();
+    let (s1, _r1) = app::channel::<String>();
+    let (s2, _r1) = app::channel::<String>();
+    let (s3, _r1) = app::channel::<String>();
+    let (s4, _r1) = app::channel::<String>();
+    let (s5, _r1) = app::channel::<String>();
+    let (s6, _r1) = app::channel::<String>();
+    let (s7, _r1) = app::channel::<String>();
+    let (s8, _r1) = app::channel::<String>();
+
     place_button1.emit(s1,"1".to_string());
     place_button2.emit(s2,"2".to_string());
     place_button3.emit(s3,"3".to_string());
@@ -89,6 +87,8 @@ fn main() {
     place_button5.emit(s5,"5".to_string());
     place_button6.emit(s6,"6".to_string());
     place_button7.emit(s7,"7".to_string());
+    //Game Control Buttons emits
+    restart_button.emit(s8,"RESTART".to_string());
 
     //Playing Buttons colors
     place_button1.set_color(Color::from_u32(BURCH_BLUE));
@@ -106,32 +106,13 @@ fn main() {
     window.end();
     window.show();
     while app.wait() {
-        if let Some(msg) = r1.recv() {
-            game.place_coin(msg.parse::<i32>().unwrap());
-            app::redraw();
-        }
-        if let Some(msg) = r2.recv() {
-            game.place_coin(msg.parse::<i32>().unwrap());
-            app::redraw();
-        }
-        if let Some(msg) = r3.recv() {
-            game.place_coin(msg.parse::<i32>().unwrap());
-            app::redraw();
-        }
-        if let Some(msg) = r4.recv() {
-            game.place_coin(msg.parse::<i32>().unwrap());
-            app::redraw();
-        } 
-        if let Some(msg) = r5.recv() {
-            game.place_coin(msg.parse::<i32>().unwrap());
-            app::redraw();
-        }
-        if let Some(msg) = r6.recv() {
-            game.place_coin(msg.parse::<i32>().unwrap());
-            app::redraw();
-        }
-        if let Some(msg) = r7.recv() {
-            game.place_coin(msg.parse::<i32>().unwrap());
+        if let Some(msg) = _r1.recv() {
+            if msg=="RESTART"{
+                game.restart_game();
+            }
+            else{
+                game.place_coin(msg.parse::<i32>().unwrap());
+            }
             app::redraw();
         }
     }
@@ -151,6 +132,24 @@ impl Game{
             player:"RED".to_string(),
             state: (0..6).map(|_| Vec::new()).collect(),
             label: Frame::new(260, 540, 400, 50, "")
+        }
+    }
+    pub fn restart_game(&mut self){
+        for row in 0..6{
+            for column in 0..7{
+                self.state[row][column].0.set_color(Color::from_u32(BG_COLOR));
+                self.state[row][column].1="EMPTY".to_string();
+            }
+        }
+        self.change_player("RED".to_string());
+    }
+    pub fn change_player(&mut self, player:String){
+        self.player=player;
+        if self.player=="RED"{
+            self.label.set_label("RED PLAYER IS ON THE MOVE");
+        }
+        else{
+            self.label.set_label("YELLOW PLAYER IS ON THE MOVE");
         }
     }
     pub fn start_game(&mut self){
@@ -192,14 +191,12 @@ impl Game{
         if self.player=="RED"{
             self.state[row_place as usize][(column-1) as usize].0.set_color(Color::from_u32(COIN_RED));
             self.state[row_place as usize][(column-1) as usize].1="RED".to_string();
-            self.player="YELLOW".to_string();
-            self.label.set_label("YELLOW PLAYER IS ON THE MOVE");
+            self.change_player("YELLOW".to_string());
         }
         else{
             self.state[row_place as usize][(column-1) as usize].0.set_color(Color::from_u32(COIN_YELLOW));
             self.state[row_place as usize][(column-1) as usize].1="YELLOW".to_string();
-            self.player="RED".to_string();
-            self.label.set_label("RED PLAYER IS ON THE MOVE");
+            self.change_player("RED".to_string());
         } 
     }
 }
