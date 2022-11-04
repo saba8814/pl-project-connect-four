@@ -39,7 +39,26 @@ fn draw_back_board(){
     board_back.set_frame(FrameType::RFlatBox);
     board_back.set_color(Color::from_u32(BOARD_COLOR));
 }
-fn draw_buttons(){
+
+fn draw_logo(){
+    let mut logo_place_holder = Frame::new(20, 30, 100, 50, "");
+    let mut logo: PngImage = PngImage::load(&std::path::Path::new("logo.png")).unwrap();
+    logo.scale(100,50,true,true);
+    logo_place_holder.set_image(Some(logo));
+}
+
+fn draw_ui(){
+    draw_back_board();
+    draw_logo();
+}
+fn main() {
+    let app = app::App::default();
+    let mut window = Window::new(100, 100, 800, 600, "Connect Four || IBU IT || PL Project");
+
+    //Text placeholder
+    let mut text_place_holder = Frame::new(260, 540, 400, 50, "YELLOW PLAYER WINS");
+    text_place_holder.set_label_size(30);
+    text_place_holder.set_label_color(Color::from_u32(BURCH_BLUE));
     //Game Control Buttons
     let mut load_button = Button::new(20, 90, 95, 50, "LOAD");
     let mut save_button = Button::new(20, 155, 95, 50, "SAVE");
@@ -64,14 +83,21 @@ fn draw_buttons(){
     save_button.set_color(Color::from_u32(BURCH_BLUE));
     restart_button.set_color(Color::from_u32(BURCH_BLUE));
 
-    //Playing Buttons callbacks
-    place_button1.set_callback(|_| make_move(1));
-    place_button2.set_callback(|_| make_move(2));
-    place_button3.set_callback(|_| make_move(3));
-    place_button4.set_callback(|_| make_move(4));
-    place_button5.set_callback(|_| make_move(5));
-    place_button6.set_callback(|_| make_move(6));
-    place_button7.set_callback(|_| make_move(7));
+    //Playing Buttons emits
+    let (s1, r1) = app::channel::<String>();
+    let (s2, r2) = app::channel::<String>();
+    let (s3, r3) = app::channel::<String>();
+    let (s4, r4) = app::channel::<String>();
+    let (s5, r5) = app::channel::<String>();
+    let (s6, r6) = app::channel::<String>();
+    let (s7, r7) = app::channel::<String>();
+    place_button1.emit(s1,"TEST1".to_string());
+    place_button2.emit(s2,"TEST2".to_string());
+    place_button3.emit(s3,"TEST3".to_string());
+    place_button4.emit(s4,"TEST4".to_string());
+    place_button5.emit(s5,"TEST5".to_string());
+    place_button6.emit(s6,"TEST6".to_string());
+    place_button7.emit(s7,"TEST7".to_string());
 
     //Playing Buttons colors
     place_button1.set_color(Color::from_u32(BURCH_BLUE));
@@ -81,101 +107,34 @@ fn draw_buttons(){
     place_button5.set_color(Color::from_u32(BURCH_BLUE));
     place_button6.set_color(Color::from_u32(BURCH_BLUE));
     place_button7.set_color(Color::from_u32(BURCH_BLUE));
-}
-fn draw_logo(){
-    let mut logo_place_holder = Frame::new(20, 30, 100, 50, "");
-    let mut logo: PngImage = PngImage::load(&std::path::Path::new("logo.png")).unwrap();
-    logo.scale(100,50,true,true);
-    logo_place_holder.set_image(Some(logo));
-}
-fn draw_text_label(){
-    let mut text_place_holder = Frame::new(260, 540, 400, 50, "YELLOW PLAYER WINS");
-    text_place_holder.set_label_size(30);
-    text_place_holder.set_label_color(Color::from_u32(BURCH_BLUE));
-}
-
-fn draw_UI(){
-    draw_back_board();
-    draw_buttons();
-    draw_logo();
-    draw_text_label();
-}
-fn main() {
-    let app = app::App::default();
-    let mut window = Window::new(100, 100, 800, 600, "Connect Four || IBU IT || PL Project");
-    let mut grid = Grid::new();
-    draw_UI();
-    grid.print();
     window.set_color(Color::from_u32(BG_COLOR));
+    //MAIN STARTS HERE
+    draw_ui();
+
+
     window.end();
     window.show();
-    app.run().unwrap(); 
-}
-
-struct Grid {
-    column_count: i32,
-    row_count: i32,
-    rows: Vec<Row>,
-}
-impl Grid {
-    pub fn new() -> Grid {
-        Grid {
-            column_count: 7,
-            row_count: 6,
-            rows: (0..7).map(|_| Row::new(6)).collect(),
+    while app.wait() {
+        if let Some(msg) = r1.recv() {
+            println!("{}",msg);
+        }
+        if let Some(msg) = r2.recv() {
+            println!("{}",msg);
+        }
+        if let Some(msg) = r3.recv() {
+            println!("{}",msg);
+        }
+        if let Some(msg) = r4.recv() {
+            println!("{}",msg);
+        } if let Some(msg) = r5.recv() {
+            println!("{}",msg);
+        }
+        if let Some(msg) = r6.recv() {
+            println!("{}",msg);
+        }
+        if let Some(msg) = r7.recv() {
+            println!("{}",msg);
         }
     }
-    pub fn print(&self) {
-        for column in 0..self.column_count {
-            for row in 0..self.row_count{
-                if row==0{
-                    let mut circle=Frame::new(150+column*94, 90, 50, 50, "");
-                    circle.set_frame(FrameType::OvalBox);
-                    if(self.rows[column as usize].tiles[row as usize].value=="RED"){
-                        circle.set_color(Color::from_u32(COIN_RED));
-                    }
-                    else{
-                        circle.set_color(Color::from_u32(COIN_BLUE));
-                    }
-                }
-                else{
-                    let mut circle=Frame::new(150+column*94, (row+1)*79, 50, 50, "");
-                    circle.set_frame(FrameType::OvalBox);
-                    if(self.rows[column as usize].tiles[row as usize].value=="RED"){
-                        circle.set_color(Color::from_u32(COIN_RED));
-                    }
-                    else{
-                        circle.set_color(Color::from_u32(COIN_BLUE));
-                    }
-                } 
-            }
-        }
-    }
-}
-struct Row {
-    tiles: Vec<Tile>,
-}
-impl Row {
-    pub fn new(column_count: usize) -> Row {
-        let mut rng = rand::thread_rng();
-        Row {
-            tiles: (0..column_count).map(|_| (if rng.gen_range(0..2)==1{Tile::new("RED".to_string())}else{Tile::new("BLUE".to_string())})).collect(),
-        }
-    }
-    pub fn len(&self) -> usize {
-        self.tiles.len() as usize
-    }
 
-}
-
-struct Tile{
-    value: String
-}
-
-impl Tile{
-    pub fn new(tile_value: String) -> Tile{
-        Tile{
-            value: tile_value
-        }
-    }
 }
