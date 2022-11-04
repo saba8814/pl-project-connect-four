@@ -1,7 +1,5 @@
 use fltk::{app, button::Button, frame::Frame, prelude::*, window::Window,enums::*,image::PngImage};
 use std::io::{BufRead, BufReader};
-use std::str::FromStr;
-use rand::Rng;
 use std::fs::File;
 use std::io::Write;
 use chrono::Local;
@@ -12,9 +10,6 @@ const BOARD_COLOR: u32 = 0x073b4c;
 const COIN_RED: u32 = 0xef476f;
 const COIN_YELLOW: u32 = 0xffd166;
 
-fn make_move(mut move_nr:i32){
-    println!("move is {}",move_nr);
-}
 fn game_restart(){
     println!("game has been restarted");
 }
@@ -190,7 +185,7 @@ impl Game{
         return row_place as i32;
     }
     pub fn place_coin(&mut self,column:i32){
-        let mut row_place=self.is_move_valid(column);
+        let row_place=self.is_move_valid(column);
         if row_place==7{
             return;
         }
