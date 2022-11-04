@@ -55,10 +55,6 @@ fn main() {
     let app = app::App::default();
     let mut window = Window::new(100, 100, 800, 600, "Connect Four || IBU IT || PL Project");
 
-    //Text placeholder
-    let mut text_place_holder = Frame::new(260, 540, 400, 50, "YELLOW PLAYER WINS");
-    text_place_holder.set_label_size(30);
-    text_place_holder.set_label_color(Color::from_u32(BURCH_BLUE));
     //Game Control Buttons
     let mut load_button = Button::new(20, 90, 95, 50, "LOAD");
     let mut save_button = Button::new(20, 155, 95, 50, "SAVE");
@@ -150,7 +146,8 @@ fn main() {
 
 struct Game{
     player: String,
-    state: Vec<Vec<(Frame,String)>>
+    state: Vec<Vec<(Frame,String)>>,
+    label: Frame
 }
 
 impl Game{
@@ -158,6 +155,7 @@ impl Game{
         Game{
             player:"RED".to_string(),
             state: (0..6).map(|_| Vec::new()).collect(),
+            label: Frame::new(260, 540, 400, 50, "")
         }
     }
     pub fn start_game(&mut self){
@@ -177,6 +175,9 @@ impl Game{
                 }
             }
         }
+        self.label.set_label("RED PLAYER IS ON THE MOVE");
+        self.label.set_label_size(30);
+        self.label.set_label_color(Color::from_u32(BURCH_BLUE));
     }
     pub fn is_move_valid(&mut self,column:i32)->i32{
         let mut row_place=7;
@@ -197,11 +198,13 @@ impl Game{
             self.state[row_place as usize][(column-1) as usize].0.set_color(Color::from_u32(COIN_RED));
             self.state[row_place as usize][(column-1) as usize].1="RED".to_string();
             self.player="YELLOW".to_string();
+            self.label.set_label("YELLOW PLAYER IS ON THE MOVE");
         }
         else{
             self.state[row_place as usize][(column-1) as usize].0.set_color(Color::from_u32(COIN_YELLOW));
             self.state[row_place as usize][(column-1) as usize].1="YELLOW".to_string();
             self.player="RED".to_string();
+            self.label.set_label("RED PLAYER IS ON THE MOVE");
         } 
     }
 }
