@@ -10,7 +10,7 @@ const BG_COLOR: u32 = 0x118ab2;
 const BURCH_BLUE: u32 = 0x073b4c;
 const BOARD_COLOR: u32 = 0x073b4c;
 const COIN_RED: u32 = 0xef476f;
-const COIN_BLUE: u32 = 0xffd166;
+const COIN_YELLOW: u32 = 0xffd166;
 
 fn make_move(mut move_nr:i32){
     println!("move is {}",move_nr);
@@ -91,13 +91,13 @@ fn main() {
     let (s5, r5) = app::channel::<String>();
     let (s6, r6) = app::channel::<String>();
     let (s7, r7) = app::channel::<String>();
-    place_button1.emit(s1,"TEST1".to_string());
-    place_button2.emit(s2,"TEST2".to_string());
-    place_button3.emit(s3,"TEST3".to_string());
-    place_button4.emit(s4,"TEST4".to_string());
-    place_button5.emit(s5,"TEST5".to_string());
-    place_button6.emit(s6,"TEST6".to_string());
-    place_button7.emit(s7,"TEST7".to_string());
+    place_button1.emit(s1,"1".to_string());
+    place_button2.emit(s2,"2".to_string());
+    place_button3.emit(s3,"3".to_string());
+    place_button4.emit(s4,"4".to_string());
+    place_button5.emit(s5,"5".to_string());
+    place_button6.emit(s6,"6".to_string());
+    place_button7.emit(s7,"7".to_string());
 
     //Playing Buttons colors
     place_button1.set_color(Color::from_u32(BURCH_BLUE));
@@ -110,31 +110,98 @@ fn main() {
     window.set_color(Color::from_u32(BG_COLOR));
     //MAIN STARTS HERE
     draw_ui();
-
-
+    let mut game = Game::new();
+    game.start_game();
     window.end();
     window.show();
     while app.wait() {
         if let Some(msg) = r1.recv() {
-            println!("{}",msg);
+            game.place_coin(msg.parse::<i32>().unwrap());
+            app::redraw();
         }
         if let Some(msg) = r2.recv() {
-            println!("{}",msg);
+            game.place_coin(msg.parse::<i32>().unwrap());
+            app::redraw();
         }
         if let Some(msg) = r3.recv() {
-            println!("{}",msg);
+            game.place_coin(msg.parse::<i32>().unwrap());
+            app::redraw();
         }
         if let Some(msg) = r4.recv() {
-            println!("{}",msg);
-        } if let Some(msg) = r5.recv() {
-            println!("{}",msg);
+            game.place_coin(msg.parse::<i32>().unwrap());
+            app::redraw();
+        } 
+        if let Some(msg) = r5.recv() {
+            game.place_coin(msg.parse::<i32>().unwrap());
+            app::redraw();
         }
         if let Some(msg) = r6.recv() {
-            println!("{}",msg);
+            game.place_coin(msg.parse::<i32>().unwrap());
+            app::redraw();
         }
         if let Some(msg) = r7.recv() {
-            println!("{}",msg);
+            game.place_coin(msg.parse::<i32>().unwrap());
+            app::redraw();
         }
     }
 
+}
+
+
+struct Game{
+    player: String,
+    state: Vec<Vec<(Frame,String)>>
+}
+
+impl Game{
+    pub fn new()->Game{
+        Game{
+            player:"RED".to_string(),
+            state: (0..6).map(|_| Vec::new()).collect(),
+        }
+    }
+    pub fn start_game(&mut self){
+        for row in 0..6{
+            for column in 0..7{
+                if row==0{
+                    let mut circle=Frame::new(150+column*94, 90, 50, 50, "");
+                    circle.set_frame(FrameType::OvalBox);
+                    circle.set_color(Color::from_u32(BG_COLOR));
+                    self.state[row].push((circle,"EMPTY".to_string()));
+                }
+                else{
+                    let mut circle=Frame::new(150+column*94, ((row+1)*79) as i32, 50, 50, "");
+                    circle.set_frame(FrameType::OvalBox);
+                    circle.set_color(Color::from_u32(BG_COLOR));
+                    self.state[row].push((circle,"EMPTY".to_string()));
+                }
+            }
+        }
+    }
+    pub fn is_move_valid(&mut self,column:i32)->i32{
+        let mut row_place=7;
+        for row in (0..6).rev(){
+            if self.state[row][(column-1) as usize].1=="EMPTY"{
+                row_place=row;
+                break;
+            }
+        }
+        return row_place as i32;
+    }
+    pub fn place_coin(&mut self,column:i32){
+        let mut row_place=self.is_move_valid(column);
+        if row_place==7{
+            return;
+        }
+        if self.player=="RED"{
+            self.state[row_place as usize][(column-1) as usize].0.set_color(Color::from_u32(COIN_RED));
+            self.state[row_place as usize][(column-1) as usize].1="RED".to_string();
+            self.player="YELLOW".to_string();
+        }
+        else{
+            self.state[row_place as usize][(column-1) as usize].0.set_color(Color::from_u32(COIN_YELLOW));
+            self.state[row_place as usize][(column-1) as usize].1="YELLOW".to_string();
+            self.player="RED".to_string();
+        } 
+    }
 }
