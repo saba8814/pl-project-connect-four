@@ -123,7 +123,8 @@ fn main() {
 struct Game{
     player: String,
     state: Vec<Vec<(Frame,String)>>,
-    label: Frame
+    label: Frame,
+    winner: String
 }
 
 impl Game{
@@ -131,7 +132,8 @@ impl Game{
         Game{
             player:"RED".to_string(),
             state: (0..6).map(|_| Vec::new()).collect(),
-            label: Frame::new(260, 540, 400, 50, "")
+            label: Frame::new(260, 540, 400, 50, ""),
+            winner: "EMPTY".to_string()
         }
     }
     pub fn restart_game(&mut self){
@@ -142,6 +144,7 @@ impl Game{
             }
         }
         self.change_player("RED".to_string());
+        self.winner="EMPTY".to_string();
     }
     pub fn change_player(&mut self, player:String){
         self.player=player;
@@ -150,6 +153,106 @@ impl Game{
         }
         else{
             self.label.set_label("YELLOW PLAYER IS ON THE MOVE");
+        }
+    }
+    pub fn check_diagonal_win(&mut self)->String{
+        let mut winner="EMPTY";
+        for row in 0..3{
+            for column in 0..4{
+                let val1=self.state[row as usize][column as usize].1.to_string();
+                let val2=self.state[(row+1) as usize][(column+1) as usize].1.to_string();
+                let val3=self.state[(row+2) as usize][(column+2) as usize].1.to_string();
+                let val4=self.state[(row+3) as usize][(column+3)as usize].1.to_string();
+                if val1=="RED" && val2=="RED" && val3=="RED" && val4=="RED"{
+                    winner="RED";
+                }
+                if val1=="YELLOW" && val2=="YELLOW" && val3=="YELLOW" && val4=="YELLOW"{
+                    winner="YELLOW";
+                }
+            }
+        }
+        for row in 0..3{
+            for column in 3..7{
+                let val1=self.state[row as usize][column as usize].1.to_string();
+                let val2=self.state[(row+1) as usize][(column-1) as usize].1.to_string();
+                let val3=self.state[(row+2) as usize][(column-2) as usize].1.to_string();
+                let val4=self.state[(row+3) as usize][(column-3)as usize].1.to_string();
+                if val1=="RED" && val2=="RED" && val3=="RED" && val4=="RED"{
+                    winner="RED";
+                }
+                if val1=="YELLOW" && val2=="YELLOW" && val3=="YELLOW" && val4=="YELLOW"{
+                    winner="YELLOW";
+                }
+            }
+        }
+        return winner.to_string();
+    }
+    pub fn check_vertical_win(&mut self)->String{
+        let mut winner="EMPTY";
+        for column in 0..7{
+            for row in 0..3{
+                let val1=self.state[row as usize][column as usize].1.to_string();
+                let val2=self.state[(row+1) as usize][column as usize].1.to_string();
+                let val3=self.state[(row+2) as usize][column as usize].1.to_string();
+                let val4=self.state[(row+3) as usize][column as usize].1.to_string();
+                if val1=="RED" && val2=="RED" && val3=="RED" && val4=="RED"{
+                    winner="RED";
+                }
+                if val1=="YELLOW" && val2=="YELLOW" && val3=="YELLOW" && val4=="YELLOW"{
+                    winner="YELLOW";
+                }
+            }
+        }
+        return winner.to_string();
+    }
+    pub fn check_horizontal_win(&mut self)->String{
+        let mut winner="EMPTY";
+        for row in 0..6{
+            for column in 0..4{
+                let val1=self.state[row as usize][column as usize].1.to_string();
+                let val2=self.state[row as usize][(column+1) as usize].1.to_string();
+                let val3=self.state[row as usize][(column+2) as usize].1.to_string();
+                let val4=self.state[row as usize][(column+3) as usize].1.to_string();
+                if val1=="RED" && val2=="RED" && val3=="RED" && val4=="RED"{
+                    winner="RED";
+                }
+                if val1=="YELLOW" && val2=="YELLOW" && val3=="YELLOW" && val4=="YELLOW"{
+                    winner="YELLOW";
+                }
+            }
+        }
+        return winner.to_string();
+    }
+    pub fn check_draw(&self)->String{
+        for row in 0..6{
+            for column in 0..7{
+                if self.state[row as usize][column as usize].1.to_string()=="EMPTY"{
+                    return "EMPTY".to_string();
+                }
+            }
+        }
+        return "DRAW".to_string();
+    }
+    pub fn check_winner(&mut self){
+        if self.check_diagonal_win()!="EMPTY"{
+            self.winner=self.check_diagonal_win().to_string();
+            self.label.set_label("we have winner");
+            return;
+        }
+        if self.check_vertical_win()!="EMPTY"{
+            self.winner=self.check_vertical_win().to_string();
+            self.label.set_label("we have winner");
+            return;
+        }
+        if self.check_horizontal_win()!="EMPTY"{
+            self.winner=self.check_horizontal_win().to_string();
+            self.label.set_label("we have winner");
+            return;
+        }
+        if self.check_draw()!="EMPTY"{
+            self.winner="DRAW".to_string();
+            self.label.set_label("it's draw");
+            return;
         }
     }
     pub fn start_game(&mut self){
@@ -183,9 +286,10 @@ impl Game{
         }
         return row_place as i32;
     }
+  
     pub fn place_coin(&mut self,column:i32){
         let row_place=self.is_move_valid(column);
-        if row_place==7{
+        if row_place==7 || self.winner!="EMPTY"{
             return;
         }
         if self.player=="RED"{
@@ -197,6 +301,7 @@ impl Game{
             self.state[row_place as usize][(column-1) as usize].0.set_color(Color::from_u32(COIN_YELLOW));
             self.state[row_place as usize][(column-1) as usize].1="YELLOW".to_string();
             self.change_player("RED".to_string());
-        } 
+        }
+        self.check_winner();
     }
 }
