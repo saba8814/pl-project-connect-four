@@ -49,6 +49,7 @@ fn main() {
 
     //Game Control Buttons
     let mut load_button = Button::new(20, 90, 95, 50, "LOAD");
+    load_button.set_selection_color(Color::from_u32(BG_COLOR));
     let mut save_button = Button::new(20, 155, 95, 50, "SAVE");
     let mut restart_button = Button::new(20, 220, 95, 50, "RESTART");
 
@@ -99,6 +100,7 @@ fn main() {
     place_button6.set_color(Color::from_u32(BURCH_BLUE));
     place_button7.set_color(Color::from_u32(BURCH_BLUE));
     window.set_color(Color::from_u32(BG_COLOR));
+    window.make_resizable(true);
     //MAIN STARTS HERE
     draw_ui();
     let mut game = Game::new();
