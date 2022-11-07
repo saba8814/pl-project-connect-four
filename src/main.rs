@@ -236,22 +236,25 @@ impl Game{
     pub fn check_winner(&mut self){
         if self.check_diagonal_win()!="EMPTY"{
             self.winner=self.check_diagonal_win().to_string();
-            self.label.set_label("we have winner");
+            let winner_string=self.check_diagonal_win().to_string()+ " player wins!";
+            self.label.set_label(&winner_string);
             return;
         }
         if self.check_vertical_win()!="EMPTY"{
             self.winner=self.check_vertical_win().to_string();
-            self.label.set_label("we have winner");
+            let winner_string=self.check_vertical_win().to_string()+ " player wins!";
+            self.label.set_label(&winner_string);
             return;
         }
         if self.check_horizontal_win()!="EMPTY"{
             self.winner=self.check_horizontal_win().to_string();
-            self.label.set_label("we have winner");
+            let winner_string=self.check_horizontal_win().to_string()+ " player wins!";
+            self.label.set_label(&winner_string);
             return;
         }
         if self.check_draw()!="EMPTY"{
             self.winner="DRAW".to_string();
-            self.label.set_label("it's draw");
+            self.label.set_label("GAME FINISHED AS DRAW");
             return;
         }
     }
