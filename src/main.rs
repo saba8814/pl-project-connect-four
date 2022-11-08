@@ -1,5 +1,6 @@
 use fltk::{app, button::Button, frame::Frame, prelude::*, window::Window,enums::*,image::PngImage};
 use std::io::{BufRead, BufReader};
+use rodio::{Decoder, OutputStream, source::Source};
 use std::fs::File;
 use std::io::Write;
 use chrono::Local;
@@ -11,9 +12,20 @@ const BOARD_COLOR: u32 = 0x073b4c;
 const COIN_RED: u32 = 0xef476f;
 const COIN_YELLOW: u32 = 0xffd166;
 
-
-
-
+fn play_coin_sound(){
+    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+    let file = BufReader::new(File::open("coin_place.mp3").unwrap());
+    let source = Decoder::new(file).unwrap();
+    stream_handle.play_raw(source.convert_samples());
+    std::thread::sleep(std::time::Duration::from_millis(150));
+}
+fn play_win_sound(){
+    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+    let file = BufReader::new(File::open("winner.mp3").unwrap());
+    let source = Decoder::new(file).unwrap();
+    stream_handle.play_raw(source.convert_samples());
+    std::thread::sleep(std::time::Duration::from_secs(7));
+}
 fn draw_back_board(){
     let mut board_back = Frame::new(130, 88, 650, 437, "");
     board_back.set_frame(FrameType::RFlatBox);
@@ -42,22 +54,31 @@ fn main() {
     let mut restart_button = Button::new(20, 220, 95, 50, "RESTART");
 
     //Playing Buttons
-    let mut place_button1 = Button::new(130, 20, 80, 50, "PLACE\n|\nv");
-    let mut place_button2  = Button::new(225, 20, 80, 50, "PLACE\n|\nv");
-    let mut place_button3  = Button::new(320, 20, 80, 50, "PLACE\n|\nv");
-    let mut place_button4  = Button::new(415, 20, 80, 50, "PLACE\n|\nv");
-    let mut place_button5  = Button::new(510, 20, 80, 50, "PLACE\n|\nv");
-    let mut place_button6  = Button::new(605, 20, 80, 50, "PLACE\n|\nv");
-    let mut place_button7  = Button::new(700, 20, 80, 50, "PLACE\n|\nv");
+    let mut place_button1 = Button::new(130, 20, 80, 50, "PLACE");
+    let mut place_button2  = Button::new(225, 20, 80, 50, "PLACE");
+    let mut place_button3  = Button::new(320, 20, 80, 50, "PLACE");
+    let mut place_button4  = Button::new(415, 20, 80, 50, "PLACE");
+    let mut place_button5  = Button::new(510, 20, 80, 50, "PLACE");
+    let mut place_button6  = Button::new(605, 20, 80, 50, "PLACE");
+    let mut place_button7  = Button::new(700, 20, 80, 50, "PLACE");
 
-    //Game Control Buttons Callbacks
 
     //Game Control Buttons Style
     load_button.set_color(Color::from_u32(BURCH_BLUE));
     save_button.set_color(Color::from_u32(BURCH_BLUE));
     restart_button.set_color(Color::from_u32(BURCH_BLUE));
+    load_button.clear_visible_focus();
+    save_button.clear_visible_focus();
+    restart_button.clear_visible_focus();
+    load_button.set_frame(FrameType::RFlatBox);
+    save_button.set_frame(FrameType::RFlatBox);
+    restart_button.set_frame(FrameType::RFlatBox);
+    load_button.set_label_color(Color::White);
+    save_button.set_label_color(Color::White);
+    restart_button.set_label_color(Color::White);
 
-    //Playing Buttons emits
+
+    //Sending and recieving channels
     let (s1, _r1) = app::channel::<String>();
     let (s2, _r1) = app::channel::<String>();
     let (s3, _r1) = app::channel::<String>();
@@ -69,6 +90,7 @@ fn main() {
     let (s9, _r1) = app::channel::<String>();
     let (s10, _r1) = app::channel::<String>();
 
+    //Playing buttons emits
     place_button1.emit(s1,"1".to_string());
     place_button2.emit(s2,"2".to_string());
     place_button3.emit(s3,"3".to_string());
@@ -81,7 +103,7 @@ fn main() {
     load_button.emit(s9,"LOAD".to_string());
     save_button.emit(s10,"SAVE".to_string());
 
-    //Playing Buttons colors
+    //Playing Buttons style
     place_button1.set_color(Color::from_u32(BURCH_BLUE));
     place_button2.set_color(Color::from_u32(BURCH_BLUE));
     place_button3.set_color(Color::from_u32(BURCH_BLUE));
@@ -89,6 +111,35 @@ fn main() {
     place_button5.set_color(Color::from_u32(BURCH_BLUE));
     place_button6.set_color(Color::from_u32(BURCH_BLUE));
     place_button7.set_color(Color::from_u32(BURCH_BLUE));
+    place_button1.set_frame(FrameType::RFlatBox);
+    place_button2.set_frame(FrameType::RFlatBox);
+    place_button3.set_frame(FrameType::RFlatBox);
+    place_button4.set_frame(FrameType::RFlatBox);
+    place_button5.set_frame(FrameType::RFlatBox);
+    place_button6.set_frame(FrameType::RFlatBox);
+    place_button7.set_frame(FrameType::RFlatBox);
+    place_button1.set_selection_color(Color::from_u32(BG_COLOR));
+    place_button2.set_selection_color(Color::from_u32(BG_COLOR));
+    place_button3.set_selection_color(Color::from_u32(BG_COLOR));
+    place_button4.set_selection_color(Color::from_u32(BG_COLOR));
+    place_button5.set_selection_color(Color::from_u32(BG_COLOR));
+    place_button6.set_selection_color(Color::from_u32(BG_COLOR));
+    place_button7.set_selection_color(Color::from_u32(BG_COLOR));
+    place_button1.set_label_color(Color::White);
+    place_button2.set_label_color(Color::White);
+    place_button3.set_label_color(Color::White);
+    place_button4.set_label_color(Color::White);
+    place_button5.set_label_color(Color::White);
+    place_button6.set_label_color(Color::White);
+    place_button7.set_label_color(Color::White);
+    place_button1.clear_visible_focus();
+    place_button2.clear_visible_focus();
+    place_button3.clear_visible_focus();
+    place_button4.clear_visible_focus();
+    place_button5.clear_visible_focus();
+    place_button6.clear_visible_focus();
+    place_button7.clear_visible_focus();
+
     window.set_color(Color::from_u32(BG_COLOR));
     window.make_resizable(true);
     //MAIN STARTS HERE
@@ -236,18 +287,21 @@ impl Game{
             self.winner=self.check_diagonal_win().to_string();
             let winner_string=self.check_diagonal_win().to_string()+ " player wins!";
             self.label.set_label(&winner_string);
+            //play_win_sound();
             return;
         }
         if self.check_vertical_win()!="EMPTY"{
             self.winner=self.check_vertical_win().to_string();
             let winner_string=self.check_vertical_win().to_string()+ " player wins!";
             self.label.set_label(&winner_string);
+            //play_win_sound();
             return;
         }
         if self.check_horizontal_win()!="EMPTY"{
             self.winner=self.check_horizontal_win().to_string();
             let winner_string=self.check_horizontal_win().to_string()+ " player wins!";
             self.label.set_label(&winner_string);
+            //play_win_sound();
             return;
         }
         if self.check_draw()!="EMPTY"{
@@ -303,6 +357,8 @@ impl Game{
             self.state[row_place as usize][(column-1) as usize].1="YELLOW".to_string();
             self.change_player("RED".to_string());
         }
+
+        play_coin_sound();
         self.check_winner();
     }
     pub fn save_game(&mut self){

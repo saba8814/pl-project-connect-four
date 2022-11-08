@@ -10,3 +10,4 @@ fltk = { version = "^1.2", features = ["fltk-bundled"] }
 rand = "0.8.4"
 chrono = "0.4"
 rfd = "0.10.0"
+rodio = "0.16.0"
