@@ -3,6 +3,7 @@ use std::io::{BufRead, BufReader};
 use std::fs::File;
 use std::io::Write;
 use chrono::Local;
+use rfd::FileDialog;
 
 const BG_COLOR: u32 = 0x118ab2;
 const BURCH_BLUE: u32 = 0x073b4c;
@@ -10,21 +11,8 @@ const BOARD_COLOR: u32 = 0x073b4c;
 const COIN_RED: u32 = 0xef476f;
 const COIN_YELLOW: u32 = 0xffd166;
 
-fn load_save_game(){
-    let reader = BufReader::new(File::open("test.txt").expect("Cannot open file.txt"));
 
-    for line in reader.lines() {
-        for word in line.unwrap().split_whitespace() {
-            println!("{}", word);
-        }
-    }
-}
 
-fn save_game(){
-    let date = Local::now();
-    let mut file = File::create(format!("{}{}",date.format("%Y-%m-%d-%H-%M-%S").to_string(),"save-game.txt")).expect("create failed");
-    file.write_all("test test".as_bytes()).expect("write failed");
-}
 
 fn draw_back_board(){
     let mut board_back = Frame::new(130, 88, 650, 437, "");
@@ -63,8 +51,6 @@ fn main() {
     let mut place_button7  = Button::new(700, 20, 80, 50, "PLACE\n|\nv");
 
     //Game Control Buttons Callbacks
-    load_button.set_callback(|_| load_save_game());
-    save_button.set_callback(|_| save_game());
 
     //Game Control Buttons Style
     load_button.set_color(Color::from_u32(BURCH_BLUE));
@@ -80,6 +66,8 @@ fn main() {
     let (s6, _r1) = app::channel::<String>();
     let (s7, _r1) = app::channel::<String>();
     let (s8, _r1) = app::channel::<String>();
+    let (s9, _r1) = app::channel::<String>();
+    let (s10, _r1) = app::channel::<String>();
 
     place_button1.emit(s1,"1".to_string());
     place_button2.emit(s2,"2".to_string());
@@ -90,6 +78,8 @@ fn main() {
     place_button7.emit(s7,"7".to_string());
     //Game Control Buttons emits
     restart_button.emit(s8,"RESTART".to_string());
+    load_button.emit(s9,"LOAD".to_string());
+    save_button.emit(s10,"SAVE".to_string());
 
     //Playing Buttons colors
     place_button1.set_color(Color::from_u32(BURCH_BLUE));
@@ -112,7 +102,13 @@ fn main() {
             if msg=="RESTART"{
                 game.restart_game();
             }
-            else{
+            if msg=="LOAD"{
+                game.load_save_game();
+            }
+            if msg=="SAVE"{
+                game.save_game();
+            }
+            if (msg!="RESTART") && (msg!="LOAD") && (msg!="SAVE"){
                 game.place_coin(msg.parse::<i32>().unwrap());
             }
             app::redraw();
@@ -308,5 +304,29 @@ impl Game{
             self.change_player("RED".to_string());
         }
         self.check_winner();
+    }
+    pub fn save_game(&mut self){
+        let date = Local::now();
+        let file = FileDialog::new()
+        .set_directory("/")
+        .add_filter("text", &["txt"])
+        .set_file_name(&format!("{}{}",date.format("%Y-%m-%d-%H-%M-%S").to_string()," save-game.txt"))
+        .save_file();
+        let mut file = File::create(file.unwrap().as_path().display().to_string()).expect("create failed");
+        file.write_all("test test".as_bytes()).expect("write failed");
+    }
+    pub fn load_save_game(&mut self){
+        let file = FileDialog::new()
+        .add_filter("text", &["txt"])
+        .set_directory("/")
+        .pick_file();
+    
+        let reader = BufReader::new(File::open(file.unwrap().as_path()).expect("Cannot open file.txt"));
+    
+        for line in reader.lines() {
+            for word in line.unwrap().split_whitespace() {
+                println!("{}", word);
+            }
+        }
     }
 }
