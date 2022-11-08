@@ -313,7 +313,13 @@ impl Game{
         .set_file_name(&format!("{}{}",date.format("%Y-%m-%d-%H-%M-%S").to_string()," save-game.txt"))
         .save_file();
         let mut file = File::create(file.unwrap().as_path().display().to_string()).expect("create failed");
-        file.write_all("test test".as_bytes()).expect("write failed");
+        file.write_all(format!("PLAYER:{}\n",self.player).to_string().as_bytes()).expect("write failed");
+        for row in 0..6{
+            for column in 0..7{
+                file.write_all(format!("{} ",self.state[row as usize][column as usize].1).to_string().as_bytes()).expect("write failed");
+            }
+            file.write_all("\n".to_string().as_bytes()).expect("write failed");
+        }
     }
     pub fn load_save_game(&mut self){
         let file = FileDialog::new()
@@ -325,7 +331,7 @@ impl Game{
     
         for line in reader.lines() {
             for word in line.unwrap().split_whitespace() {
-                println!("{}", word);
+                print!("{}", word);
             }
         }
     }
