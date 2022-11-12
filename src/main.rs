@@ -373,6 +373,10 @@ impl Game{
         self.check_winner();
     }
     pub fn save_game(&mut self){
+        if self.winner!="EMPTY"{
+            self.label.set_label("You can't save finished game!");
+            return;
+        }
         let date = Local::now();
         let file = FileDialog::new()
         .set_directory("/")
