@@ -1,16 +1,18 @@
 use fltk::{app, button::Button, frame::Frame, prelude::*, window::Window,enums::*,image::PngImage};
-use std::io::{BufRead, BufReader};
+use std::io::{BufReader};
 use rodio::{Decoder, OutputStream, source::Source};
 use std::fs::File;
 use std::io::Write;
 use chrono::Local;
 use rfd::FileDialog;
+use std::io::Read;
+use std::str::Split;
 
-const BG_COLOR: u32 = 0x118ab2;
-const BURCH_BLUE: u32 = 0x073b4c;
-const BOARD_COLOR: u32 = 0x073b4c;
-const COIN_RED: u32 = 0xef476f;
-const COIN_YELLOW: u32 = 0xffd166;
+const BG_COLOR: u32 = 0x121212;
+const BURCH_BLUE: u32 = 0x1e1e1e;
+const BOARD_COLOR: u32 = 0x1e1e1e;
+const COIN_RED: u32 = 0xcf6679;
+const COIN_YELLOW: u32 = 0x03dac6;
 
 fn play_coin_sound(){
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
@@ -154,7 +156,16 @@ fn main() {
                 game.restart_game();
             }
             if msg=="LOAD"{
-                game.load_save_game();
+                let mut file = File::open(game.pick_save_game()).expect("error");
+                let mut contents = String::new();
+                file.read_to_string(&mut contents).expect("something went wrong reading the file");
+                let lines: Split<&str> = contents.split("\n");
+                let mut data: Vec<String> = Vec::new();
+
+                for line in lines{
+                    data.push(line.to_string());
+                }
+                game.load_save_game(data);
             }
             if msg=="SAVE"{
                 game.save_game();
@@ -369,7 +380,7 @@ impl Game{
         .set_file_name(&format!("{}{}",date.format("%Y-%m-%d-%H-%M-%S").to_string()," save-game.txt"))
         .save_file();
         let mut file = File::create(file.unwrap().as_path().display().to_string()).expect("create failed");
-        file.write_all(format!("PLAYER:{}\n",self.player).to_string().as_bytes()).expect("write failed");
+        file.write_all(format!("{}\n",self.player).to_string().as_bytes()).expect("write failed");
         for row in 0..6{
             for column in 0..7{
                 file.write_all(format!("{} ",self.state[row as usize][column as usize].1).to_string().as_bytes()).expect("write failed");
@@ -377,18 +388,39 @@ impl Game{
             file.write_all("\n".to_string().as_bytes()).expect("write failed");
         }
     }
-    pub fn load_save_game(&mut self){
+    pub fn pick_save_game(&mut self)->String
+    {
         let file = FileDialog::new()
         .add_filter("text", &["txt"])
         .set_directory("/")
-        .pick_file();
-    
-        let reader = BufReader::new(File::open(file.unwrap().as_path()).expect("Cannot open file.txt"));
-    
-        for line in reader.lines() {
-            for word in line.unwrap().split_whitespace() {
-                print!("{}", word);
+        .pick_file(); 
+
+        return file.unwrap().as_path().display().to_string();
+    }
+    pub fn load_save_game(&mut self,data:Vec<String>){
+        self.restart_game();
+        self.change_player(data[0].to_string());
+        for row in 0..6{
+            let lines: Split<&str> = data[row+1].split(" ");
+            let mut row_data: Vec<String> = Vec::new();
+
+            for line in lines{
+                row_data.push(line.to_string());
+            }
+
+            for column in 0..7{
+                self.state[row][column].1=row_data[column].to_string();
+                if row_data[column]=="EMPTY"{
+                    self.state[row][column].0.set_color(Color::from_u32(BG_COLOR));
+                }
+                if row_data[column]=="RED"{
+                    self.state[row][column].0.set_color(Color::from_u32(COIN_RED));
+                }
+                if row_data[column]=="YELLOW"{
+                    self.state[row][column].0.set_color(Color::from_u32(COIN_YELLOW));
+                }
             }
         }
+        self.winner="EMPTY".to_string();
     }
 }
