@@ -11,8 +11,8 @@ use std::str::Split;
 const BG_COLOR: u32 = 0x121212;
 const BURCH_BLUE: u32 = 0x1e1e1e;
 const BOARD_COLOR: u32 = 0x1e1e1e;
-const COIN_RED: u32 = 0xcf6679;
-const COIN_YELLOW: u32 = 0x03dac6;
+const COIN_RED: u32 = 0xa30000;
+const COIN_YELLOW: u32 = 0xff9800;
 
 fn play_coin_sound(){
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
@@ -48,7 +48,8 @@ fn draw_ui(){
 fn main() {
     let app = app::App::default();
     let mut window = Window::new(100, 100, 800, 600, "Connect Four || IBU IT || PL Project");
-
+    let mut logo: PngImage = PngImage::load(&std::path::Path::new("logo.png")).unwrap();
+    window.set_icon(Some(logo));
     //Game Control Buttons
     let mut load_button = Button::new(20, 90, 95, 50, "LOAD");
     load_button.set_selection_color(Color::from_u32(BG_COLOR));
@@ -298,21 +299,21 @@ impl Game{
             self.winner=self.check_diagonal_win().to_string();
             let winner_string=self.check_diagonal_win().to_string()+ " player wins!";
             self.label.set_label(&winner_string);
-            //play_win_sound();
+            play_win_sound();
             return;
         }
         if self.check_vertical_win()!="EMPTY"{
             self.winner=self.check_vertical_win().to_string();
             let winner_string=self.check_vertical_win().to_string()+ " player wins!";
             self.label.set_label(&winner_string);
-            //play_win_sound();
+            play_win_sound();
             return;
         }
         if self.check_horizontal_win()!="EMPTY"{
             self.winner=self.check_horizontal_win().to_string();
             let winner_string=self.check_horizontal_win().to_string()+ " player wins!";
             self.label.set_label(&winner_string);
-            //play_win_sound();
+            play_win_sound();
             return;
         }
         if self.check_draw()!="EMPTY"{
