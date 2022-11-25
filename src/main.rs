@@ -1,4 +1,4 @@
-use fltk::{app, button::Button, frame::Frame, prelude::*, window::Window,enums::*,image::PngImage};
+use fltk::{app, button::Button, frame::Frame, prelude::*, window::Window,enums::*,image::PngImage,input::IntInput};
 use std::io::{BufReader};
 use rodio::{Decoder, OutputStream, source::Source};
 use std::fs::File;
@@ -8,8 +8,9 @@ use rfd::FileDialog;
 use std::io::Read;
 use std::str::Split;
 
+const MAX_SIZE: usize = 32;
 const BG_COLOR: u32 = 0x121212;
-const BURCH_BLUE: u32 = 0x1e1e1e;
+const BG_ACTIVE: u32 = 0x1e1e1e;
 const BOARD_COLOR: u32 = 0x1e1e1e;
 const COIN_RED: u32 = 0xa30000;
 const COIN_YELLOW: u32 = 0xff9800;
@@ -45,18 +46,30 @@ fn main() {
     window.set_icon(Some(logo));
     //Game Control Buttons
     let mut save_button = Button::new(20, 155, 95, 50, "SAVE");
-    let mut restart_button = Button::new(20, 220, 95, 50, "RESTART");
+    let mut restart_button = Button::new(20, 220, 95, 50, "PLAY");
     let mut load_button = Button::new(20, 90, 95, 50, "LOAD");
-
-
+    let mut input_rows = IntInput::new(20,295,95,50,"");
+    let mut input_columns = IntInput::new(20,365,95,50,"");
+    let mut input_rows_label =Frame::new(20, 280, 95, 15, "# of ROWS");
+    let mut input_column_label =Frame::new(20, 350, 95, 15, "# of COLUMNS");
+    input_rows_label.set_label_color(Color::White);
+    input_column_label.set_label_color(Color::White);
+    input_rows.set_value("6");
+    input_columns.set_value("7");
+    input_rows.set_frame(FrameType::RFlatBox);
+    input_columns.set_frame(FrameType::RFlatBox);
+    input_rows.set_color(Color::from_u32(BG_ACTIVE));
+    input_columns.set_color(Color::from_u32(BG_ACTIVE));
+    input_rows.set_text_color(Color::White);
+    input_columns.set_text_color(Color::White);
     //Game Control Buttons Style
     load_button.set_selection_color(Color::from_u32(BG_COLOR));
-    load_button.set_color(Color::from_u32(BURCH_BLUE));
+    load_button.set_color(Color::from_u32(BG_ACTIVE));
     load_button.clear_visible_focus();
     load_button.set_frame(FrameType::RFlatBox);
     load_button.set_label_color(Color::White);
-    save_button.set_color(Color::from_u32(BURCH_BLUE));
-    restart_button.set_color(Color::from_u32(BURCH_BLUE));
+    save_button.set_color(Color::from_u32(BG_ACTIVE));
+    restart_button.set_color(Color::from_u32(BG_ACTIVE));
     save_button.clear_visible_focus();
     restart_button.clear_visible_focus();
     save_button.set_frame(FrameType::RFlatBox);
@@ -76,7 +89,6 @@ fn main() {
     load_button.emit(s4,"LOAD".to_string());
 
     window.set_color(Color::from_u32(BG_COLOR));
-    window.make_resizable(true);
     //MAIN STARTS HERE
     draw_ui();
     let mut game = Game::new(6,7);
@@ -86,7 +98,26 @@ fn main() {
     while app.wait() {
         if let Some(msg) = _r1.recv() {
             if msg=="RESTART"{
-                game.restart_game();
+                let rows:i32=input_rows.value().parse().unwrap();
+                let columns:i32=input_columns.value().parse().unwrap();
+                if rows as usize ==game.row_size && columns as usize==game.column_size{
+                    game.restart_game();
+                }
+                else{
+                    let mut diff=rows-columns;
+                    diff=diff.abs();
+                    if diff>2 || rows<6 || columns<6{
+                        input_rows.set_value(&game.row_size.to_string());
+                        input_columns.set_value(&game.column_size.to_string());
+                        game.label.set_label_color(Color::from_u32(COIN_RED));
+                        game.label.set_label("INVALID BOARD SIZE");
+                    }
+                    else{
+                        game.column_size=columns as usize;
+                        game.row_size=rows as usize;
+                        game.restart_game();
+                    }
+                }
             }
             if msg=="LOAD"{
                 let mut file = File::open(game.pick_save_game()).expect("error");
@@ -98,6 +129,8 @@ fn main() {
                     data.push(line.to_string());
                 }
                 game.load_save_game(data);
+                input_rows.set_value(&game.row_size.to_string());
+                input_columns.set_value(&game.column_size.to_string());
             }
             if msg=="SAVE"{
                 game.save_game();
@@ -134,16 +167,41 @@ impl Game{
             player:"RED".to_string(),
             row_size: rows as usize,
             column_size: columns as usize,
-            state: (0..16).map(|_| Vec::new()).collect(),
+            state: (0..MAX_SIZE).map(|_| Vec::new()).collect(),
             label: Frame::new(260, 540, 400, 50, ""),
             winner: "EMPTY".to_string(),
             buttons: Vec::new()
         }
     }
+    pub fn clear_board(&mut self){
+        for row in 0..MAX_SIZE{
+            for column in 0..MAX_SIZE{  
+                self.state[row][column].1="EMPTY".to_string();
+                self.state[row][column].0.resize(0,0,0,0);
+                self.state[row][column].0.set_color(Color::from_u32(BG_COLOR));
+            }
+        }
+    }
     pub fn restart_game(&mut self){
-        self.label.set_label_color(Color::from_u32(BURCH_BLUE));
+        self.update_buttons();
+        self.clear_board();
+        self.label.set_label_color(Color::from_u32(BG_ACTIVE));
+        let mut coin_radius:i32=((650/self.column_size)).try_into().unwrap();
+        coin_radius=coin_radius-40;
+        if coin_radius>55{
+            coin_radius=55;
+        }
+        if coin_radius<10{
+            coin_radius=10;
+        }
         for row in 0..self.row_size{
             for column in 0..self.column_size{
+                if row==0{
+                    self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90, coin_radius, coin_radius);
+                }
+                else{
+                    self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+20)*(row) as i32, coin_radius, coin_radius);
+                }
                 self.state[row][column].0.set_color(Color::from_u32(BG_COLOR));
                 self.state[row][column].1="EMPTY".to_string();
             }
@@ -264,15 +322,15 @@ impl Game{
         }
     }
     pub fn start_game(&mut self){
-        for i in 0..16{
+        for i in 0..MAX_SIZE{
             let mut but1;
             if i >= self.column_size{
-                but1=Button::new(0, 0, 0, 0, "PLAY");
+                but1=Button::new(0, 0, 0, 0, "PUT");
             }
             else{
-                but1=Button::new((130+(i*650/self.column_size)).try_into().unwrap(), 20, ((650/self.column_size)-10).try_into().unwrap(), 50, "PLAY");
+                but1=Button::new((130+(i*650/self.column_size)).try_into().unwrap(), 20, ((650/self.column_size)-10).try_into().unwrap(), 50, "PUT");
             }
-            but1.set_color(Color::from_u32(BURCH_BLUE));
+            but1.set_color(Color::from_u32(BG_ACTIVE));
             but1.set_frame(FrameType::RFlatBox);
             but1.set_label_color(Color::White);
             but1.clear_visible_focus();
@@ -282,15 +340,16 @@ impl Game{
             but1.emit(s1,str_value.to_string());
             self.buttons.push(but1);
         }
-        let mut cicrle_radius:i32=((650/self.column_size)-40).try_into().unwrap();
-        if cicrle_radius>55{
-            cicrle_radius=55;
+        let mut coin_radius:i32=((650/self.column_size)).try_into().unwrap();
+        coin_radius=coin_radius-40;
+        if coin_radius>55{
+            coin_radius=55;
         }
-        if cicrle_radius<10{
-            cicrle_radius=10;
+        if coin_radius<10{
+            coin_radius=10;
         }
-        for row in 0..16{
-            for column in 0..16{
+        for row in 0..MAX_SIZE{
+            for column in 0..MAX_SIZE{
                 if row>=self.row_size || column>=self.column_size{
                     let mut circle=Frame::new(0, 0, 0, 0, "");
                     circle.set_frame(FrameType::OvalBox);
@@ -299,13 +358,13 @@ impl Game{
                     continue;
                 }
                 if row==0{
-                    let mut circle=Frame::new((150+column*(650/self.column_size)).try_into().unwrap(), 90, cicrle_radius, cicrle_radius, "");
+                    let mut circle=Frame::new((150+column*(650/self.column_size)).try_into().unwrap(), 90, coin_radius, coin_radius, "");
                     circle.set_frame(FrameType::OvalBox);
                     circle.set_color(Color::from_u32(BG_COLOR));
                     self.state[row].push((circle,"EMPTY".to_string()));
                 }
                 else{
-                    let mut circle=Frame::new((150+column*(650/self.column_size)).try_into().unwrap(), 90+(cicrle_radius+20)*(row) as i32, cicrle_radius, cicrle_radius, "");
+                    let mut circle=Frame::new((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+20)*(row) as i32, coin_radius, coin_radius, "");
                     circle.set_frame(FrameType::OvalBox);
                     circle.set_color(Color::from_u32(BG_COLOR));
                     self.state[row].push((circle,"EMPTY".to_string()));
@@ -314,7 +373,7 @@ impl Game{
         }
         self.label.set_label("RED PLAYER IS ON THE MOVE");
         self.label.set_label_size(30);
-        self.label.set_label_color(Color::from_u32(BURCH_BLUE));
+        self.label.set_label_color(Color::from_u32(BG_ACTIVE));
     }
     pub fn is_move_valid(&mut self,column:i32)->i32{
         let mut row_place=self.row_size+1;
@@ -378,10 +437,10 @@ impl Game{
         return file.unwrap().as_path().display().to_string();
     }
     pub fn update_buttons(&mut self){
-        for i in 0..16{
+        for i in 0..MAX_SIZE{
             if i<self.column_size{
                 self.buttons[i].resize((130+(i*650/self.column_size)).try_into().unwrap(), 20, ((650/self.column_size)-10).try_into().unwrap(),50);
-                self.buttons[i].set_label("PLAY");
+                self.buttons[i].set_label("PUT");
             }
             else{
                 self.buttons[i].resize(0,0,0,0);
@@ -395,12 +454,13 @@ impl Game{
         self.column_size=(data[2].parse::<i32>().unwrap()) as usize;
         self.update_buttons();
         self.restart_game();
-        let mut cicrle_radius:i32=((650/self.column_size)-40).try_into().unwrap();
-        if cicrle_radius>55{
-            cicrle_radius=55;
+        let mut coin_radius:i32=((650/self.column_size)).try_into().unwrap();
+        coin_radius=coin_radius-40;
+        if coin_radius>55{
+            coin_radius=55;
         }
-        if cicrle_radius<10{
-            cicrle_radius=10;
+        if coin_radius<10{
+            coin_radius=10;
         }
         for row in 0..self.row_size{
             let lines: Split<&str> = data[row+3].split(" ");
@@ -415,35 +475,35 @@ impl Game{
                 if row_data[column]=="EMPTY"{
                     self.state[row][column].0.set_color(Color::from_u32(BG_COLOR));
                     if row==0{
-                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90, cicrle_radius, cicrle_radius);
+                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90, coin_radius, coin_radius);
                     }
                     else{
-                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(cicrle_radius+20)*(row) as i32, cicrle_radius, cicrle_radius);
+                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+20)*(row) as i32, coin_radius, coin_radius);
                     }
                 }
                 if row_data[column]=="RED"{
                     self.state[row][column].0.set_color(Color::from_u32(COIN_RED));
                     if row==0{
-                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90, cicrle_radius, cicrle_radius);
+                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90, coin_radius, coin_radius);
                     }
                     else{
-                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(cicrle_radius+20)*(row) as i32, cicrle_radius, cicrle_radius);
+                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+20)*(row) as i32, coin_radius, coin_radius);
                     }
                 }
                 if row_data[column]=="YELLOW"{
                     self.state[row][column].0.set_color(Color::from_u32(COIN_YELLOW));
                     if row==0{
-                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90, cicrle_radius, cicrle_radius);
+                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90, coin_radius, coin_radius);
                     }
                     else{
-                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(cicrle_radius+20)*(row) as i32, cicrle_radius, cicrle_radius);
+                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+20)*(row) as i32, coin_radius, coin_radius);
                     }
                 }
             }
         }
-        for row in 0..16{
-            for column in 0..16{
-                if(row>=self.row_size || column>=self.column_size){
+        for row in 0..MAX_SIZE{
+            for column in 0..MAX_SIZE{
+                if row>=self.row_size || column>=self.column_size{
                     self.state[row][column].1="EMPTY".to_string();
                     self.state[row][column].0.resize(0,0,0,0);
                     self.state[row][column].0.set_color(Color::from_u32(BG_COLOR));
