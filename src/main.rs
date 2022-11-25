@@ -21,13 +21,6 @@ fn play_coin_sound(){
     stream_handle.play_raw(source.convert_samples());
     std::thread::sleep(std::time::Duration::from_millis(150));
 }
-fn play_win_sound(){
-    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-    let file = BufReader::new(File::open("winner.mp3").unwrap());
-    let source = Decoder::new(file).unwrap();
-    stream_handle.play_raw(source.convert_samples());
-    std::thread::sleep(std::time::Duration::from_secs(7));
-}
 fn draw_back_board(){
     let mut board_back = Frame::new(130, 88, 650, 437, "");
     board_back.set_frame(FrameType::RFlatBox);
@@ -109,8 +102,14 @@ fn main() {
             if msg=="SAVE"{
                 game.save_game();
             }
-            if (msg!="RESTART") && (msg!="LOAD") && (msg!="SAVE"){
+            if (msg!="RESTART") && (msg!="LOAD") && (msg!="SAVE"){  
                 game.place_coin(msg.parse::<i32>().unwrap());
+                if game.winner=="RED"{
+                    game.label.set_label_color(Color::from_u32(COIN_RED));
+                }
+                if game.winner=="YELLOW"{
+                    game.label.set_label_color(Color::from_u32(COIN_YELLOW));
+                }
             }
             app::redraw();
         }
@@ -142,6 +141,7 @@ impl Game{
         }
     }
     pub fn restart_game(&mut self){
+        self.label.set_label_color(Color::from_u32(BURCH_BLUE));
         for row in 0..self.row_size{
             for column in 0..self.column_size{
                 self.state[row][column].0.set_color(Color::from_u32(BG_COLOR));
@@ -243,21 +243,18 @@ impl Game{
             self.winner=self.check_diagonal_win().to_string();
             let winner_string=self.check_diagonal_win().to_string()+ " player wins!";
             self.label.set_label(&winner_string);
-            play_win_sound();
             return;
         }
         if self.check_vertical_win()!="EMPTY"{
             self.winner=self.check_vertical_win().to_string();
             let winner_string=self.check_vertical_win().to_string()+ " player wins!";
             self.label.set_label(&winner_string);
-            play_win_sound();
             return;
         }
         if self.check_horizontal_win()!="EMPTY"{
             self.winner=self.check_horizontal_win().to_string();
             let winner_string=self.check_horizontal_win().to_string()+ " player wins!";
             self.label.set_label(&winner_string);
-            play_win_sound();
             return;
         }
         if self.check_draw()!="EMPTY"{
