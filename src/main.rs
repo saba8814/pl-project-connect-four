@@ -348,7 +348,6 @@ impl Game{
 
         play_coin_sound();
         self.check_winner();
-        self.buttons=Vec::new();
     }
     pub fn save_game(&mut self){
         if self.winner!="EMPTY"{
@@ -397,8 +396,8 @@ impl Game{
         self.change_player(data[0].to_string());
         self.row_size=(data[1].parse::<i32>().unwrap()) as usize;
         self.column_size=(data[2].parse::<i32>().unwrap()) as usize;
-        self.restart_game();
         self.update_buttons();
+        self.restart_game();
         let mut cicrle_radius:i32=((650/self.column_size)-40).try_into().unwrap();
         if cicrle_radius>55{
             cicrle_radius=55;
