@@ -419,16 +419,22 @@ impl Game{
         .add_filter("text", &["txt"])
         .set_file_name(&format!("{}{}",date.format("%Y-%m-%d-%H-%M-%S").to_string()," save-game.txt"))
         .save_file();
-        let mut file = File::create(file.unwrap().as_path().display().to_string()).expect("create failed");
-        file.write_all(format!("{}\n",self.player).to_string().as_bytes()).expect("write failed");
-        file.write_all(format!("{}\n",self.row_size).to_string().as_bytes()).expect("write failed");
-        file.write_all(format!("{}\n",self.column_size).to_string().as_bytes()).expect("write failed");
-        for row in 0..self.row_size{
-            for column in 0..self.column_size{
-                file.write_all(format!("{} ",self.state[row as usize][column as usize].1).to_string().as_bytes()).expect("write failed");
+        match file {
+            Some(value) => {
+                let mut file = File::create(value.as_path().display().to_string()).expect("create failed");
+                file.write_all(format!("{}\n",self.player).to_string().as_bytes()).expect("write failed");
+                file.write_all(format!("{}\n",self.row_size).to_string().as_bytes()).expect("write failed");
+                file.write_all(format!("{}\n",self.column_size).to_string().as_bytes()).expect("write failed");
+                for row in 0..self.row_size{
+                    for column in 0..self.column_size{
+                        file.write_all(format!("{} ",self.state[row as usize][column as usize].1).to_string().as_bytes()).expect("write failed");
+                    }
+                    file.write_all("\n".to_string().as_bytes()).expect("write failed");
+                }
             }
-            file.write_all("\n".to_string().as_bytes()).expect("write failed");
+            None => {return;}
         }
+        
     }
     pub fn pick_save_game(&mut self)->String
     {
