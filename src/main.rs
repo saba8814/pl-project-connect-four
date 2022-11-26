@@ -120,17 +120,20 @@ fn main() {
                 }
             }
             if msg=="LOAD"{
-                let mut file = File::open(game.pick_save_game()).expect("error");
-                let mut contents = String::new();
-                file.read_to_string(&mut contents).expect("something went wrong reading the file");
-                let lines: Split<&str> = contents.split("\n");
-                let mut data: Vec<String> = Vec::new();
-                for line in lines{
-                    data.push(line.to_string());
+                let file_path=game.pick_save_game();
+                if file_path!="NOT FOUND"{
+                    let mut file = File::open(&file_path).expect("error");
+                    let mut contents = String::new();
+                    file.read_to_string(&mut contents).expect("something went wrong reading the file");
+                    let lines: Split<&str> = contents.split("\n");
+                    let mut data: Vec<String> = Vec::new();
+                    for line in lines{
+                        data.push(line.to_string());
+                    }
+                    game.load_save_game(data);
+                    input_rows.set_value(&game.row_size.to_string());
+                    input_columns.set_value(&game.column_size.to_string());
                 }
-                game.load_save_game(data);
-                input_rows.set_value(&game.row_size.to_string());
-                input_columns.set_value(&game.column_size.to_string());
             }
             if msg=="SAVE"{
                 game.save_game();
@@ -433,8 +436,10 @@ impl Game{
         .add_filter("text", &["txt"])
         .set_directory("/")
         .pick_file(); 
-
-        return file.unwrap().as_path().display().to_string();
+        match file {
+            Some(value) => {return value.display().to_string();}
+            None => {return "NOT FOUND".to_string();}
+        }
     }
     pub fn update_buttons(&mut self){
         for i in 0..MAX_SIZE{
