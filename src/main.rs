@@ -54,7 +54,7 @@ fn main() {
                 else{
                     let mut diff=rows-columns;
                     diff=diff.abs();
-                    if diff>2 || rows<6 || columns<6{
+                    if diff>2 || rows<6 || columns<6 || rows as usize>constants::MAX_SIZE || columns as usize>constants::MAX_SIZE{
                         input_rows.set_value(&game.row_size.to_string());
                         input_columns.set_value(&game.column_size.to_string());
                         game.label.set_label_color(Color::from_u32(constants::COIN_RED));

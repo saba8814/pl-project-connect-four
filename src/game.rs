@@ -45,21 +45,14 @@ impl Game{
         self.update_buttons();
         self.clear_board();
         self.label.set_label_color(Color::from_u32(BG_ACTIVE));
-        let mut coin_radius:i32=((650/self.column_size)).try_into().unwrap();
-        coin_radius=coin_radius-40;
-        if coin_radius>55{
-            coin_radius=55;
-        }
-        if coin_radius<10{
-            coin_radius=10;
-        }
+        let coin_radius:i32=self.calculate_coin_radius();
         for row in 0..self.row_size{
             for column in 0..self.column_size{
                 if row==0{
                     self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90, coin_radius, coin_radius);
                 }
                 else{
-                    self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+20)*(row) as i32, coin_radius, coin_radius);
+                    self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+12)*(row) as i32, coin_radius, coin_radius);
                 }
                 self.state[row][column].0.set_color(Color::from_u32(BG_COLOR));
                 self.state[row][column].1="EMPTY".to_string();
@@ -199,14 +192,7 @@ impl Game{
             but1.emit(s1,str_value.to_string());
             self.buttons.push(but1);
         }
-        let mut coin_radius:i32=((650/self.column_size)).try_into().unwrap();
-        coin_radius=coin_radius-40;
-        if coin_radius>55{
-            coin_radius=55;
-        }
-        if coin_radius<10{
-            coin_radius=10;
-        }
+        let coin_radius:i32=self.calculate_coin_radius();
         for row in 0..MAX_SIZE{
             for column in 0..MAX_SIZE{
                 if row>=self.row_size || column>=self.column_size{
@@ -223,7 +209,7 @@ impl Game{
                     self.state[row].push((circle,"EMPTY".to_string()));
                 }
                 else{
-                    let mut circle=Frame::new((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+20)*(row) as i32, coin_radius, coin_radius, "");
+                    let mut circle=Frame::new((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+12)*(row) as i32, coin_radius, coin_radius, "");
                     circle.set_frame(FrameType::OvalBox);
                     circle.set_color(Color::from_u32(BG_COLOR));
                     self.state[row].push((circle,"EMPTY".to_string()));
@@ -322,14 +308,7 @@ impl Game{
         self.column_size=(data[2].parse::<i32>().unwrap()) as usize;
         self.update_buttons();
         self.restart_game();
-        let mut coin_radius:i32=((650/self.column_size)).try_into().unwrap();
-        coin_radius=coin_radius-40;
-        if coin_radius>55{
-            coin_radius=55;
-        }
-        if coin_radius<10{
-            coin_radius=10;
-        }
+        let coin_radius:i32=self.calculate_coin_radius();
         for row in 0..self.row_size{
             let lines: Split<&str> = data[row+3].split(" ");
             let mut row_data: Vec<String> = Vec::new();
@@ -346,7 +325,7 @@ impl Game{
                         self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90, coin_radius, coin_radius);
                     }
                     else{
-                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+20)*(row) as i32, coin_radius, coin_radius);
+                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+12)*(row) as i32, coin_radius, coin_radius);
                     }
                 }
                 if row_data[column]=="RED"{
@@ -355,7 +334,7 @@ impl Game{
                         self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90, coin_radius, coin_radius);
                     }
                     else{
-                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+20)*(row) as i32, coin_radius, coin_radius);
+                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+12)*(row) as i32, coin_radius, coin_radius);
                     }
                 }
                 if row_data[column]=="YELLOW"{
@@ -364,7 +343,7 @@ impl Game{
                         self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90, coin_radius, coin_radius);
                     }
                     else{
-                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+20)*(row) as i32, coin_radius, coin_radius);
+                        self.state[row][column].0.resize((150+column*(650/self.column_size)).try_into().unwrap(), 90+(coin_radius+12)*(row) as i32, coin_radius, coin_radius);
                     }
                 }
             }
@@ -379,5 +358,18 @@ impl Game{
             }
         }
         self.winner="EMPTY".to_string();
+    }
+
+    pub fn calculate_coin_radius(&mut self)->i32{
+        let mut coin_radius:i32=((650/((self.column_size+self.row_size)/2))).try_into().unwrap();
+        coin_radius=coin_radius-35;
+        if coin_radius>55{
+            coin_radius=55;
+        }
+        if coin_radius<10{
+            coin_radius=10;
+        }
+
+        return coin_radius;
     }
 }
