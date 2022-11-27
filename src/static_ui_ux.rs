@@ -10,8 +10,13 @@ pub fn play_coin_sound(){
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
     let file = BufReader::new(File::open("coin_place.mp3").unwrap());
     let source = Decoder::new(file).unwrap();
-    stream_handle.play_raw(source.convert_samples());
-    std::thread::sleep(std::time::Duration::from_millis(150));
+
+    match stream_handle.play_raw(source.convert_samples())
+    {
+        Err(_e) => {return;},
+        _ => {std::thread::sleep(std::time::Duration::from_millis(150));}
+    }
+    
 }
 fn draw_back_board(){
     let mut board_back = Frame::new(130, 88, 650, 437, "");
