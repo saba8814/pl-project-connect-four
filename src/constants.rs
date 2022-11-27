@@ -1,4 +1,4 @@
-pub const MAX_SIZE: usize = 32;
+pub const MAX_SIZE: usize = 20;
 pub const BG_COLOR: u32 = 0x121212;
 pub const BG_ACTIVE: u32 = 0x1e1e1e;
 pub const BOARD_COLOR: u32 = 0x1e1e1e;
