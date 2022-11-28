@@ -2,8 +2,8 @@
 name = "pl-project-connect-four"
 version = "0.1.0"
 edition = "2021"
+authors = ["Ejub <ejub.sabic@stu.ibu.edu.ba>", "Amar <amar.fazlic@stu.ibu.edu.ba>","Saliha <saliha.mustafic@stu.ibu.edu.ba>"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 fltk = { version = "^1.2", features = ["fltk-bundled"] }
