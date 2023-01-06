@@ -1,17 +1,10 @@
-# Connect Four game done in Rust [![Awesome](https://awesome.re/badge.svg)](https://github.com/saba8814/pl-project-connect-four)
-
-
-<!-- Hello World greeting -->
-<p align="center">
-<a href="https://github.com/saba8814/pl-project-connect-four">
-<img height=350 alt="Repo Banner - Awesome Repo Template" src="https://rishavanand.github.io/static/images/greetings.gif"></img></a>
-</p>
+# Connect Four game done in Rust 
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
   <a href="https://github.com/saba8814/pl-project-connect-four">
-    <img src="https://www.guninetwork.org/files/logo_22.png" alt="Logo" width="240" height="80">
+    <img src="logo.png" alt="Logo">
   </a>
 
 ### Project in IT Programming Languages @ International Burch University 👨‍💻</div>  
@@ -26,6 +19,11 @@
 
 - ❓ If you have any questions, feel free to contact us🤖  
   
+  
+<div align="center">
+   <img src="https://user-images.githubusercontent.com/90252317/211016527-4e3019b1-30a7-4db7-be76-608833845697.jpg" width="425"/> <img src="https://user-images.githubusercontent.com/90252317/211016897-de0e3771-3fe3-42c2-ba75-5d494633fce0.jpg" width="425"/> 
+  
+ </div> 
 
 <br/>  
 
@@ -81,6 +79,30 @@ Cross platform development is a huge feather in Rust’s cap, and powerful, robu
 There is a huge, vibrant developer community out there with plenty of how-to’s, tutorials, and webinars on working with Rust. Though the user base is a fraction of that of other programming languages, the community is super helpful and close knit. This is what you want, instead of being met with the jaded toxicity of trolls that lurk in the Java message boards.
 
 <br/>  
+
+
+<!-- FEATURES-->
+## Features of this project
+
+
+- Resizable Board ✖️  
+  
+
+- Saving Game💾  
+  
+
+- Loading Game 🔁  
+  
+
+- Sound effects🔊  
+  
+
+- Supporting major platforms (Windows, Linux, Mac OS) 🖥️  
+  
+
+
+<br>
+
 
 <!-- ABOUT TEAM MEMBERS -->
 ## Connect with us 
