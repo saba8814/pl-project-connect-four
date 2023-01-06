@@ -19,6 +19,8 @@
 
 - ❓ If you have any questions, feel free to contact us🤖  
   
+  <br>
+  <br>
   
 <div align="center">
    <img src="https://user-images.githubusercontent.com/90252317/211016527-4e3019b1-30a7-4db7-be76-608833845697.jpg" width="425"/> <img src="https://user-images.githubusercontent.com/90252317/211016897-de0e3771-3fe3-42c2-ba75-5d494633fce0.jpg" width="425"/> 
@@ -34,7 +36,8 @@ Connect Four is a two-player connection board game, in which the players choose 
 
 As mentioned above, this project was done in IT 305 Programming Languages course at International Burch University, and implemented in the RUST programming language.
 
-
+<br>
+<br>
 
 <!-- ABOUT RUST -->
 ### About Rust  
@@ -49,7 +52,8 @@ Rust is a systems-level programming language designed with safety in mind. The c
 C++ compiler messages are notoriously difficult to decipher, and while they’ve made huge advancements on how errors are communicated, Rust does it on a whole other level. There is a reason why Rust is one of the hottest programming languages used today.
 
 It’s estimated that there are almost a million rust developers world-wide, and while these sound like rookie numbers when compared to the tens of millions that use JavaScript and Python, it’s still significant.
-
+<br>
+<br>
 ### Why use Rust?
 
 <b>1 – I Am Speed: </b>
@@ -102,6 +106,7 @@ There is a huge, vibrant developer community out there with plenty of how-to’s
 
 
 <br>
+<br>
 
 
 <!-- ABOUT TEAM MEMBERS -->
@@ -148,11 +153,12 @@ There is a huge, vibrant developer community out there with plenty of how-to’s
 </a>  
   
 
-<br/>  
+<br>  
+<br>
  
 
 <!--HOW TO RUN -->
-### How to run?  
+## How to run?  
 
 - To run the project, you will first need to install Rust. You can find detailed instructions <a href="https://www.rust-lang.org/tools/install">on this link</a>.
 
