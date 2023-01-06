@@ -159,8 +159,10 @@ There is a huge, vibrant developer community out there with plenty of how-to’s
 - After installing Rust, follow these steps to run the game:
  ```
    git clone  https://github.com/saba8814/pl-project-connect-four
-   cd cargo-run
-   
+   ```
+- Navigate to the folder you cloned your project in
+```
+   cargo run
    ```
 
  
