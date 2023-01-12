@@ -15,6 +15,7 @@ pub struct Game{
     pub row_size: usize,
     pub column_size: usize,
     pub state: Vec<Vec<(Frame,String)>>,
+    pub history_of_moves: Vec<i32>,
     pub label: Frame,
     pub winner: String,
     pub buttons: Vec<Button>
@@ -28,6 +29,7 @@ impl Game{
             column_size: columns as usize,
             state: (0..MAX_SIZE).map(|_| Vec::new()).collect(),
             label: Frame::new(260, 540, 400, 50, ""),
+            history_of_moves: Vec::new(),
             winner: "EMPTY".to_string(),
             buttons: Vec::new()
         }
@@ -45,6 +47,7 @@ impl Game{
         self.update_buttons();
         self.clear_board();
         self.label.set_label_color(Color::from_u32(BG_ACTIVE));
+        self.history_of_moves.clear();
         let coin_radius:i32=self.calculate_coin_radius();
         for row in 0..self.row_size{
             for column in 0..self.column_size{
@@ -235,7 +238,8 @@ impl Game{
         let row_place=self.is_move_valid(column);
         if row_place==(self.row_size+1) as i32 || self.winner!="EMPTY"{
             return;
-        }       
+        }
+        self.history_of_moves.push(column);       
         self.label.set_label_color(Color::from_u32(BG_ACTIVE));
         if self.player=="RED"{
             self.state[row_place as usize][(column-1) as usize].0.set_color(Color::from_u32(COIN_RED));
@@ -268,6 +272,13 @@ impl Game{
                 file.write_all(format!("{}\n",self.player).to_string().as_bytes()).expect("write failed");
                 file.write_all(format!("{}\n",self.row_size).to_string().as_bytes()).expect("write failed");
                 file.write_all(format!("{}\n",self.column_size).to_string().as_bytes()).expect("write failed");
+                for i in &self.history_of_moves {
+                    // iterate by-value
+                    let i:&i32 = i; // elements are values
+                    file.write_all(format!("{} ",i).to_string().as_bytes()).expect("write failed");
+                }
+                file.write_all("\n".to_string().as_bytes()).expect("write failed");
+
                 for row in 0..self.row_size{
                     for column in 0..self.column_size{
                         file.write_all(format!("{} ",self.state[row as usize][column as usize].1).to_string().as_bytes()).expect("write failed");
@@ -303,14 +314,18 @@ impl Game{
         }
     }
     pub fn load_save_game(&mut self,data:Vec<String>){
+        self.restart_game();
         self.change_player(data[0].to_string());
         self.row_size=(data[1].parse::<i32>().unwrap()) as usize;
         self.column_size=(data[2].parse::<i32>().unwrap()) as usize;
+        self.history_of_moves.clear();
+        for token in data[3].split_whitespace(){
+            self.history_of_moves.push(token.parse::<i32>().unwrap());
+         }
         self.update_buttons();
-        self.restart_game();
         let coin_radius:i32=self.calculate_coin_radius();
         for row in 0..self.row_size{
-            let lines: Split<&str> = data[row+3].split(" ");
+            let lines: Split<&str> = data[row+4].split(" ");
             let mut row_data: Vec<String> = Vec::new();
 
             for line in lines{
