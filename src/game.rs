@@ -17,6 +17,8 @@ pub struct Game{
     pub state: Vec<Vec<(Frame,String)>>,
     pub history_of_moves: Vec<i32>,
     pub label: Frame,
+    pub red_moves: Frame,
+    pub yellow_moves: Frame,
     pub winner: String,
     pub buttons: Vec<Button>
 }
@@ -29,6 +31,8 @@ impl Game{
             column_size: columns as usize,
             state: (0..MAX_SIZE).map(|_| Vec::new()).collect(),
             label: Frame::new(260, 540, 400, 50, ""),
+            red_moves: Frame::new(20, 435, 80, 80, "RED"),
+            yellow_moves: Frame::new(20, 505, 80, 80, "YELLOW"),
             history_of_moves: Vec::new(),
             winner: "EMPTY".to_string(),
             buttons: Vec::new()
@@ -44,6 +48,8 @@ impl Game{
         }
     }
     pub fn restart_game(&mut self){
+        self.red_moves.set_label("RED");
+        self.yellow_moves.set_label("YELLOW");
         self.update_buttons();
         self.clear_board();
         self.label.set_label_color(Color::from_u32(BG_ACTIVE));
@@ -177,6 +183,8 @@ impl Game{
         }
     }
     pub fn start_game(&mut self){
+        self.red_moves.set_label_color(Color::from_u32(COIN_RED));
+        self.yellow_moves.set_label_color(Color::from_u32(COIN_YELLOW));
         for i in 0..MAX_SIZE{
             let mut but1;
             if i >= self.column_size{
@@ -253,8 +261,41 @@ impl Game{
         }
 
         play_coin_sound();
+        self.update_moves();
         self.check_winner();
     }
+
+    pub fn update_moves(&mut self) {
+        let mut red_moves_string: String = "".to_string();
+        let mut yellow_moves_string: String = "".to_string();
+        let mut yellow_counter: i32 = 0;
+        let mut red_counter: i32 = 0;
+        for i in 0..self.history_of_moves.len() {
+            if i % 2 == 0 {
+                red_counter+=1;
+                red_moves_string = format!("{}{}", red_moves_string, self.history_of_moves[i].to_string());
+                red_moves_string = format!("{}{}", red_moves_string, " ".to_string());
+                if red_counter == 5 {
+                    red_counter = 0;
+                    red_moves_string = format!("{}{}", red_moves_string, "\n".to_string());
+                }
+            }
+            else {
+                yellow_counter += 1;
+                yellow_moves_string = format!("{}{}", yellow_moves_string, self.history_of_moves[i].to_string());
+                yellow_moves_string = format!("{}{}", yellow_moves_string, " ".to_string());
+                if yellow_counter == 5 {
+                    yellow_counter = 0;
+                    yellow_moves_string = format!("{}{}", yellow_moves_string, "\n".to_string());
+                }
+            }
+        }
+        red_moves_string = format!("{} {}", "RED\n".to_string(), red_moves_string);
+        yellow_moves_string = format!("{} {}", "YELLOW\n".to_string(), yellow_moves_string);
+        self.red_moves.set_label(&red_moves_string);
+        self.yellow_moves.set_label(&yellow_moves_string);
+    }
+
     pub fn save_game(&mut self){
         if self.winner!="EMPTY"{
             self.label.set_label("You can't save finished game!");
@@ -373,6 +414,7 @@ impl Game{
             }
         }
         self.winner="EMPTY".to_string();
+        self.update_moves();
     }
 
     pub fn calculate_coin_radius(&mut self)->i32{
