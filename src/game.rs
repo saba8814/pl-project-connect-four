@@ -275,7 +275,7 @@ impl Game{
                 red_counter+=1;
                 red_moves_string = format!("{}{}", red_moves_string, self.history_of_moves[i].to_string());
                 red_moves_string = format!("{}{}", red_moves_string, " ".to_string());
-                if red_counter == 5 {
+                if red_counter == 7 {
                     red_counter = 0;
                     red_moves_string = format!("{}{}", red_moves_string, "\n".to_string());
                 }
@@ -284,7 +284,7 @@ impl Game{
                 yellow_counter += 1;
                 yellow_moves_string = format!("{}{}", yellow_moves_string, self.history_of_moves[i].to_string());
                 yellow_moves_string = format!("{}{}", yellow_moves_string, " ".to_string());
-                if yellow_counter == 5 {
+                if yellow_counter == 7 {
                     yellow_counter = 0;
                     yellow_moves_string = format!("{}{}", yellow_moves_string, "\n".to_string());
                 }
